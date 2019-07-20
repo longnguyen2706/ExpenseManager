@@ -8,6 +8,7 @@ EXCEL_FILE = "../resources/DBS_Jan19.xlsx"
 COLUMN_TYPES= {"Balance": float,"Date": str, "Deposit": float, "Description": str, "Withdrawal": str}
 COLUMN_NAMES = ["Balance","Date", "Deposit", "Description", "Withdrawal"]
 
+
 def read_excel(file_path):
 
     # open_xls_as_xlsx(file_path)
