@@ -4,6 +4,7 @@ from django.shortcuts import render
 
 # Create your views here.
 from visualizer.models import SuperStore
+from visualizer.services import group_by, date_to_year, sum_by_group
 
 
 def import_data(request):
@@ -27,3 +28,9 @@ def import_data(request):
     # data = serializers.serialize("json", super_stores, indent=4)
 
     return HttpResponse("Inserted "+ str(len(super_stores)) + " records")
+
+
+def sales_by_year(request):
+    values, gr_records = group_by('order_date', date_to_year,  SuperStore.objects.all())
+    print (values)
+    print( sum_by_group('quantity', gr_records))
