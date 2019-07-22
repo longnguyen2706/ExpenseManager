@@ -38,3 +38,10 @@ def sales_by_year(request):
     data = json.dumps(data_entity, default = serialize)
     return HttpResponse(data, content_type='application/json')
 
+def quantiy_by_month(request):
+    values, gr_records = group_by('order_date', date_to_month, SuperStore.objects.all())
+    sums = sum_by_group('quantity', gr_records)
+    data_entity = get_chart_response(values, [sums])
+    data = json.dumps(data_entity, default=serialize)
+    return HttpResponse(data, content_type='application/json')
+

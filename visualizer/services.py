@@ -14,6 +14,9 @@ def group_by(field_name: str, f, records: List[SuperStore]):
 def date_to_year(d: date):
     return d.year
 
+def date_to_month(d: date):
+    return d.month
+
 def get_all_values(f, l:List):
     values = sorted(set(map(lambda x: f(x), l)))
     return values
