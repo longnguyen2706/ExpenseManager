@@ -1,10 +1,11 @@
+import json
 from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import render
 
 # Create your views here.
 from visualizer.models import SuperStore
-from visualizer.services import group_by, date_to_year, sum_by_group
+from visualizer.services import *
 
 
 def import_data(request):
@@ -32,5 +33,8 @@ def import_data(request):
 
 def sales_by_year(request):
     values, gr_records = group_by('order_date', date_to_year,  SuperStore.objects.all())
-    print (values)
-    print( sum_by_group('quantity', gr_records))
+    sums = sum_by_group('quantity', gr_records)
+    data_entity = get_chart_response(values, [sums])
+    data = json.dumps(data_entity, default = serialize)
+    return HttpResponse(data, content_type='application/json')
+

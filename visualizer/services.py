@@ -1,7 +1,8 @@
 from typing import List
 
-from datetime import date
+from datetime import date, time
 
+from visualizer.entities import ColumnHeader, RowCell, Row, DataEntity
 from visualizer.models import SuperStore
 
 
@@ -20,3 +21,26 @@ def get_all_values(f, l:List):
 def sum_by_group(field_name: str,  records: List[List[SuperStore]]):
     sums = [sum(map(lambda x: getattr(x, field_name), l)) for l in records]
     return sums
+
+def serialize(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, date):
+        serial = obj.isoformat()
+        return serial
+
+    if isinstance(obj, time):
+        serial = obj.isoformat()
+        return serial
+
+    return obj.__dict__
+
+def get_chart_response(labels: List[str], sums: [List[int]]):
+    columns = [ColumnHeader(str(l), str(l), "string") for l in labels]
+    rows = []
+    for s in sums:
+        row_data = [RowCell(v,'') for v  in s]
+        row = Row(row_data, '', '')
+        rows.append(row)
+
+    return DataEntity(columns, rows)
