@@ -1,8 +1,9 @@
 import json
 from django.core import serializers
+from django.forms import model_to_dict
 from django.http import HttpResponse
 from django.shortcuts import render
-
+from django.core import serializers
 # Create your views here.
 from visualizer.models import SuperStore
 from visualizer.services import *
@@ -38,10 +39,22 @@ def sales_by_year(request):
     data = json.dumps(data_entity, default = serialize)
     return HttpResponse(data, content_type='application/json')
 
-def quantiy_by_month(request):
+def quantity_by_month(request):
     values, gr_records = group_by('order_date', date_to_month, SuperStore.objects.all())
     sums = sum_by_group('quantity', gr_records)
     data_entity = get_chart_response(values, [sums])
     data = json.dumps(data_entity, default=serialize)
     return HttpResponse(data, content_type='application/json')
 
+def get_all_records(request):
+    records = SuperStore.objects.all()[:10]
+    # dict_obj = model_to_dict(records)
+    # data = json.dumps(dict_obj, default=serialize)
+    cols = [f.name for f in SuperStore._meta.fields if f.name is not 'id']
+    # r_data = [d['fields'] for d in serializers.serialize("json", records)]
+    r_data = serializers.serialize("json", records)
+    json_data = {
+        'cols': cols,
+        'records': json.loads(r_data)
+    }
+    return HttpResponse(json.dumps(json_data), content_type='application/json')
