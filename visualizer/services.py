@@ -6,15 +6,19 @@ from visualizer.models import *
 
 
 def group_by(field_name: str, f, records: List[SuperStore]):
-    values = sorted(set(map(lambda x: f(getattr(x, field_name)), records)))
+    values = sorted(set(map(lambda x: f(getattr(x, field_name)), records)), key=get_value_obj_key)
+    print([v.label for v in values])
     newlist = [[y for y in records if f(getattr(y, field_name)) == x] for x in values]
     return list(values), newlist
 
+def get_value_obj_key(v: ValueObject):
+    return v.value
+
 def date_to_year(d: date):
-    return d.year
+    return ValueObject(d.year, str(d.year))
 
 def date_to_month(d: date):
-    return d.month
+    return ValueObject(d.month, d.strftime('%B'))
 
 def get_all_values(f, l:List):
     values = sorted(set(map(lambda x: f(x), l)))
@@ -37,15 +41,15 @@ def serialize(obj):
 
     return obj.__dict__
 
-def get_table_entity(cols: List[str], rows: [List[str]]):
+def get_table_entity(cols: List[ValueObject], rows: [List[str]]):
     p_rows = []
-    p_cols = [str(c) for c in cols]
+    p_cols = [str(c.label) for c in cols]
     for r in rows:
         p_rows.append(dict(zip(p_cols, r)))
     return TableEntity(p_cols, p_rows)
     
 def get_chart_entity(labels: List[str], sums: [List[int]]):
-    columns = [ChartColumnHeader(str(l), str(l), "string") for l in labels]
+    columns = [ColumnHeader(str(l.value), l.label, "string") for l in labels]
     rows = []
     for s in sums:
         row_data = [RowCell(v,'') for v  in s]

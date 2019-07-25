@@ -13,7 +13,7 @@ class ChartRow:
         self.label = label
 
 
-class ChartColumnHeader:
+class ColumnHeader:
     def __init__(self, id: str, label: str, type: str):
         self.id = id
         self.label = label
@@ -21,7 +21,7 @@ class ChartColumnHeader:
 
 
 class ChartEntity:
-    def __init__(self, columns: List[ChartColumnHeader], rows: List[ChartRow]):
+    def __init__(self, columns: List[ColumnHeader], rows: List[ChartRow]):
         self.columns = columns
         self.rows = rows
 
@@ -34,3 +34,23 @@ class VisualizerEntity:
     def __init__(self, chart: ChartEntity, table: TableEntity):
         self.chart = chart
         self.table = table
+
+class ValueObject:
+    def __init__(self, value, label):
+        self.value = value
+        self.label = label
+
+    def __repr__(self):
+        return "Object(%s, %s)" % (self.value, self.label)
+
+    def __eq__(self, other):
+        if isinstance(other, ValueObject):
+            return ((self.value == other.value) and (self.label == other.label))
+        else:
+            return False
+
+    def __ne__(self, other):
+        return (not self.__eq__(other))
+
+    def __hash__(self):
+        return hash(self.__repr__())
