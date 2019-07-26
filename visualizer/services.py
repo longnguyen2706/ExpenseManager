@@ -1,3 +1,4 @@
+import decimal
 from datetime import date, time
 from typing import List
 
@@ -20,6 +21,9 @@ def date_to_year(d: date):
 def date_to_month(d: date):
     return ValueObject(d.month, d.strftime('%B'))
 
+def do_nothing(x):
+    return ValueObject(x, x)
+
 def get_all_values(f, l:List):
     values = sorted(set(map(lambda x: f(x), l)))
     return values
@@ -38,7 +42,9 @@ def serialize(obj):
     if isinstance(obj, time):
         serial = obj.isoformat()
         return serial
-
+    if isinstance(obj, decimal.Decimal):
+        serial = str(obj)
+        return serial
     return obj.__dict__
 
 def get_table_entity(cols: List[ValueObject], rows: [List[str]]):

@@ -42,8 +42,8 @@ def sales_by_year(request):
     return HttpResponse(data, content_type='application/json')
 
 def quantity_by_month(request):
-    values, gr_records = group_by('order_date', date_to_month, SuperStore.objects.all())
-    sums = sum_by_group('quantity', gr_records)
+    values, gr_records = group_by('sub_category', do_nothing, SuperStore.objects.all())
+    sums = sum_by_group('profit', gr_records)
     chart_entity = get_chart_entity(values, [sums])
     table_entity = get_table_entity(values, [sums])
     data = json.dumps(VisualizerEntity(chart_entity, table_entity), default=serialize)
