@@ -5,10 +5,13 @@ from django.forms import model_to_dict
 from django.http import HttpResponse
 from django.shortcuts import render
 
+from visualizer.ProcessingFunction import ProcessingFunction
 from visualizer.entities import *
 from visualizer.models import SuperStore
 from visualizer.services import *
+from django.views.decorators.csrf import csrf_exempt
 
+pros_func = ProcessingFunction()
 
 def import_data(request):
     SUPER_STORE_FILE = "../resources/sample_superstore.xls"
@@ -34,26 +37,42 @@ def import_data(request):
 
 
 def sales_by_year(request):
-    values, gr_records = group_by('order_date', date_to_year,  SuperStore.objects.all())
-    sums = sum_by_group('quantity', gr_records)
+    values, gr_records = group_by('order_date', pros_func.date_to_year,  SuperStore.objects.all())
+    sums = pros_func.sum_by_group('quantity', gr_records)
     chart_entity = get_chart_entity(values, [sums])
     table_entity = get_table_entity(values, [sums])
     data = json.dumps(VisualizerEntity(chart_entity, table_entity), default = serialize)
     return HttpResponse(data, content_type='application/json')
 
 def quantity_by_month(request):
-    values, gr_records = group_by('sub_category', do_nothing, SuperStore.objects.all())
-    sums = sum_by_group('profit', gr_records)
+    values, gr_records = group_by('sub_category', pros_func.do_nothing, SuperStore.objects.all())
+    sums = pros_func.sum_by_group('profit', gr_records)
     chart_entity = get_chart_entity(values, [sums])
     table_entity = get_table_entity(values, [sums])
     data = json.dumps(VisualizerEntity(chart_entity, table_entity), default=serialize)
     return HttpResponse(data, content_type='application/json')
 
+@csrf_exempt
+def plot_chart(request):
+    if request.method == 'POST':
+        values=json.loads(request.body.decode('utf-8'))
+        visual_entities = []
+        for value in values:
+            form_value = FormValue(value['xField'], value['xFunc'], value['yField'], value['yFunc'])
+            values, gr_records = group_by(form_value.xField, getattr(pros_func, form_value.xFunc), SuperStore.objects.all())
+            f = getattr(pros_func, form_value.yFunc)
+            sums = f(form_value.yField, gr_records)
+            chart_entity = get_chart_entity(values, [sums])
+            table_entity = get_table_entity(values, [sums])
+            visual_entities.append(VisualizerEntity(chart_entity, table_entity))
+        data = json.dumps(visual_entities, default=serialize)
+        return HttpResponse(data, content_type='application/json')
+
 def get_all_records(request):
     records = SuperStore.objects.all()[:100]
     # dict_obj = model_to_dict(records)
     # data = json.dumps(dict_obj, default=serialize)
-    cols = [f.name for f in SuperStore._meta.fields if f.name is not 'id']
+    cols = [f['name'] for f in get_field_info()]
     # r_data = [d['fields'] for d in serializers.serialize("json", records)]
     r_data = serializers.serialize("json", records)
     json_data = {
@@ -61,3 +80,7 @@ def get_all_records(request):
         'records': json.loads(r_data)
     }
     return HttpResponse(json.dumps(json_data), content_type='application/json')
+
+def get_processing_form(request):
+    data = json.dumps(get_visual_form_entity(), default=serialize)
+    return HttpResponse(data, content_type='application/json')

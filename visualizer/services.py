@@ -12,25 +12,15 @@ def group_by(field_name: str, f, records: List[SuperStore]):
     newlist = [[y for y in records if f(getattr(y, field_name)) == x] for x in values]
     return list(values), newlist
 
+
 def get_value_obj_key(v: ValueObject):
     return v.value
 
-def date_to_year(d: date):
-    return ValueObject(d.year, str(d.year))
 
-def date_to_month(d: date):
-    return ValueObject(d.month, d.strftime('%B'))
-
-def do_nothing(x):
-    return ValueObject(x, x)
-
-def get_all_values(f, l:List):
+def get_all_values(f, l: List):
     values = sorted(set(map(lambda x: f(x), l)))
     return values
 
-def sum_by_group(field_name: str,  records: List[List[SuperStore]]):
-    sums = [sum(map(lambda x: getattr(x, field_name), l)) for l in records]
-    return sums
 
 def serialize(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -47,19 +37,52 @@ def serialize(obj):
         return serial
     return obj.__dict__
 
+
 def get_table_entity(cols: List[ValueObject], rows: [List[str]]):
     p_rows = []
     p_cols = [str(c.label) for c in cols]
     for r in rows:
         p_rows.append(dict(zip(p_cols, r)))
     return TableEntity(p_cols, p_rows)
-    
+
+
 def get_chart_entity(labels: List[str], sums: [List[int]]):
     columns = [ColumnHeader(str(l.value), l.label, "string") for l in labels]
     rows = []
     for s in sums:
-        row_data = [RowCell(v,'') for v  in s]
+        row_data = [RowCell(v, '') for v in s]
         row = ChartRow(row_data, '', '')
         rows.append(row)
 
     return ChartEntity(columns, rows)
+
+
+def get_visual_form_entity():
+    field_info = get_field_info()
+    field_options = []
+    field_func_map = {}
+    for info in field_info:
+        field_func_map[info['name']] = get_avail_func(info['type'])
+        field_options.append(FormOption(info['name'], info['name']))
+    return VisualFormEntity(field_options, field_func_map)
+
+
+def get_avail_func(fieldType):
+    if (fieldType == "CharField"):
+        return [FormOption("do nothing", "do_nothing")]
+    elif (fieldType == "DateField"):
+        return [FormOption("year", "date_to_year"), FormOption("month", "date_to_month")]
+    elif (fieldType == "DecimalField" or fieldType == "IntegerField"):
+        return [FormOption("sum", "sum_by_group")]
+    else:
+        return [FormOption("do nothing", "do_nothing")]
+
+
+def get_field_info():
+    return [
+        {
+            'name': f.name,
+            'type': str(f.get_internal_type())
+        }
+        for f in SuperStore._meta.fields if f.name is not 'id']
+

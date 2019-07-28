@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 
 class RowCell:
@@ -54,3 +54,25 @@ class ValueObject:
 
     def __hash__(self):
         return hash(self.__repr__())
+
+class FormOption:
+    def __init__(self, label, value):
+        self.value = value
+        self.label = label
+
+class FormValue: 
+    def __init__(self, xField, xFunc, yField, yFunc):
+        self.xField = xField
+        self.xFunc = xFunc 
+        self.yField = yField 
+        self.yFunc = yFunc
+
+    def object_decoder(obj):
+        print(obj)
+        return FormValue(obj['xField'], obj['xFunc'], obj['yField'], obj['yFunc'])
+
+
+class VisualFormEntity:
+    def __init__(self, fieldOptions:List[FormOption], fieldFuncMap:Dict[str, List[FormOption]]):
+        self.fieldOptions = fieldOptions
+        self.fieldFuncMap = fieldFuncMap
