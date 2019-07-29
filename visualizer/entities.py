@@ -73,6 +73,7 @@ class FormValue:
 
 
 class VisualFormEntity:
-    def __init__(self, fieldOptions:List[FormOption], fieldFuncMap:Dict[str, List[FormOption]]):
+    def __init__(self, fieldOptions:List[FormOption], xFieldFuncMap:Dict[str, List[FormOption]], yFieldFuncMap:Dict[str, List[FormOption]]):
         self.fieldOptions = fieldOptions
-        self.fieldFuncMap = fieldFuncMap
+        self.xFieldFuncMap = xFieldFuncMap
+        self.yFieldFuncMap = yFieldFuncMap

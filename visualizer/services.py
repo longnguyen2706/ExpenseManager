@@ -60,22 +60,34 @@ def get_chart_entity(labels: List[str], sums: [List[int]]):
 def get_visual_form_entity():
     field_info = get_field_info()
     field_options = []
-    field_func_map = {}
+    x_field_func_map = {}
+    y_field_func_map ={}
     for info in field_info:
-        field_func_map[info['name']] = get_avail_func(info['type'])
+        x_field_func_map[info['name']] = get_x_avail_func(info['type'])
+        y_field_func_map[info['name']] = get_y_avail_func(info['type'])
         field_options.append(FormOption(info['name'], info['name']))
-    return VisualFormEntity(field_options, field_func_map)
+    return VisualFormEntity(field_options, x_field_func_map, y_field_func_map)
 
 
-def get_avail_func(fieldType):
+def get_x_avail_func(fieldType):
     if (fieldType == "CharField"):
         return [FormOption("do nothing", "do_nothing")]
     elif (fieldType == "DateField"):
-        return [FormOption("year", "date_to_year"), FormOption("month", "date_to_month")]
+        return [ FormOption("month", "date_to_month"), FormOption("year", "date_to_year"), FormOption("month_year", "date_to_month_year")]
+    elif (fieldType == "DecimalField" or fieldType == "IntegerField"):
+        return [FormOption("do nothing", "do_nothing")]
+    else:
+        return [FormOption("do nothing", "do_nothing")]
+
+def get_y_avail_func(fieldType):
+    if (fieldType == "CharField"):
+        return [FormOption("count", "count_frequency")]
+    elif (fieldType == "DateField"):
+        return [FormOption("do nothing", "do_nothing")]
     elif (fieldType == "DecimalField" or fieldType == "IntegerField"):
         return [FormOption("sum", "sum_by_group")]
     else:
-        return [FormOption("do nothing", "do_nothing")]
+        return [FormOption("process nothing", "process_nothing")]
 
 
 def get_field_info():
